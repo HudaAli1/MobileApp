@@ -16,7 +16,10 @@ export default function SettingsScreen({ navigation }) {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         <AppHeader title="Settings" />
-        <BrandLogo width={180} height={180} style={styles.logoSpacing} />
+        <View style={styles.topSection}>
+          <BrandLogo width={300} height={220} style={styles.logoSpacing} />
+        </View>
+
         <View style={styles.profileCard}>
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
@@ -44,7 +47,12 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: spacing.lg,
-    gap: spacing.lg,
+    paddingTop: spacing.sm,
+    gap: spacing.md,
+  },
+  topSection: {
+    alignItems: 'center',
+    marginBottom: 10,
   },
   profileCard: {
     backgroundColor: colors.surface,
@@ -54,8 +62,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   logoSpacing: {
-    marginTop: -spacing.sm,
-    marginBottom: 24,
+    marginBottom: 10,
   },
   name: {
     ...typography.sectionTitle,

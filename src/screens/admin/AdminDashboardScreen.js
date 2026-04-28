@@ -15,13 +15,15 @@ export default function AdminDashboardScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <AppHeader
-          title="Manage Events"
-          rightAction={() => navigation.getParent()?.replace('Auth')}
-          rightLabel="Logout"
-        />
-        <BrandLogo width={180} height={180} style={styles.logoSpacing} />
         <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
+          <AppHeader
+            title="Manage Events"
+            rightAction={() => navigation.getParent()?.replace('Auth')}
+            rightLabel="Logout"
+          />
+          <View style={styles.topSection}>
+            <BrandLogo width={300} height={220} style={styles.logoSpacing} />
+          </View>
           {events.map((event) => (
             <View key={event.id} style={styles.card}>
               <View style={styles.textWrap}>
@@ -61,13 +63,16 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.lg,
   },
+  topSection: {
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   list: {
     gap: spacing.md,
     paddingBottom: 100,
   },
   logoSpacing: {
-    marginTop: -spacing.sm,
-    marginBottom: 24,
+    marginBottom: 10,
   },
   card: {
     backgroundColor: colors.surface,

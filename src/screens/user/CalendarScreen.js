@@ -32,8 +32,8 @@ export default function CalendarScreen({ navigation }) {
 
         <View style={styles.calendarCard}>
           <View style={styles.weekRow}>
-            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-              <Text key={day} style={styles.weekday}>{day}</Text>
+            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+              <Text key={`weekday-${index}-${day}`} style={styles.weekday}>{day}</Text>
             ))}
           </View>
           <View style={styles.grid}>
@@ -59,9 +59,9 @@ export default function CalendarScreen({ navigation }) {
           <SectionTitle title="Events on Selected Date" />
           <View style={styles.list}>
             {selectedEvents.length ? (
-              selectedEvents.map((event) => (
+              selectedEvents.map((event, index) => (
                 <EventCard
-                  key={event.id}
+                  key={`calendar-event-${event.id ?? index}`}
                   event={event}
                   onPress={() => navigation.navigate('EventDetails', { eventId: event.id })}
                 />

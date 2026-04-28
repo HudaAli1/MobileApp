@@ -36,8 +36,8 @@ export default function HomeScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <View>
-          <BrandLogo width={180} height={180} style={styles.logoSpacing} />
+        <View style={styles.topSection}>
+          <BrandLogo width={300} height={220} style={styles.logoSpacing} />
           <Text style={styles.welcome}>Upcoming Events</Text>
           <Text style={styles.subtitle}>Discover what is happening across campus this week.</Text>
         </View>
@@ -47,9 +47,9 @@ export default function HomeScreen({ navigation }) {
         <View>
           <SectionTitle title="Based on Your Interests" />
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}>
-            {(interestEvents.length ? interestEvents : filteredEvents.slice(0, 3)).map((event) => (
+            {(interestEvents.length ? interestEvents : filteredEvents.slice(0, 3)).map((event, index) => (
               <LargeEventCard
-                key={event.id}
+                key={`featured-event-${event.id ?? index}`}
                 event={event}
                 onPress={() => navigation.navigate('EventDetails', { eventId: event.id })}
               />
@@ -60,9 +60,9 @@ export default function HomeScreen({ navigation }) {
         <View>
           <SectionTitle title="Explore All Events" />
           <View style={styles.eventList}>
-            {filteredEvents.map((event) => (
+            {filteredEvents.map((event, index) => (
               <EventCard
-                key={event.id}
+                key={`home-event-${event.id ?? index}`}
                 event={event}
                 onPress={() => navigation.navigate('EventDetails', { eventId: event.id })}
               />
@@ -81,19 +81,25 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: spacing.lg,
+    paddingTop: spacing.md,
     paddingBottom: spacing.xxl,
-    gap: spacing.lg,
+    gap: spacing.md,
+  },
+  topSection: {
+    alignItems: 'center',
+    marginBottom: 12,
   },
   welcome: {
     ...typography.screenTitle,
     color: colors.primary,
   },
   logoSpacing: {
-    marginBottom: 24,
+    marginBottom: 10,
   },
   subtitle: {
     ...typography.body,
-    marginTop: spacing.xs,
+    marginTop: 10,
+    textAlign: 'center',
   },
   horizontalList: {
     paddingRight: spacing.lg,

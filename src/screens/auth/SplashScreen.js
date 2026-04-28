@@ -9,7 +9,7 @@ export default function SplashScreen({ onFinish }) {
   return (
     <LinearGradient colors={['#F7F8FC', '#E9EEFB', '#F7F8FC']} style={styles.container}>
       <View style={styles.card}>
-        <BrandLogo width={360} height={360} style={styles.logoSpacing} />
+        <BrandLogo width={300} height={300} style={styles.logoSpacing} />
         <View style={styles.loadingRow}>
           <ActivityIndicator color={colors.primary} size="small" />
           <Text style={styles.loadingText}>Preparing your event experience...</Text>
@@ -24,22 +24,22 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: spacing.xl,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.xl,
   },
   card: {
     width: '100%',
-    maxWidth: 380,
     alignItems: 'center',
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   logoSpacing: {
-    marginBottom: 24,
+    marginBottom: 12,
   },
   loadingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-    marginTop: spacing.md,
+    marginTop: 12,
   },
   loadingText: {
     ...typography.caption,

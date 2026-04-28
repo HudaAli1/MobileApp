@@ -24,9 +24,9 @@ export default function EditInterestsScreen({ navigation }) {
       <ScrollView contentContainerStyle={styles.container}>
         <AppHeader title="Edit Your Interests" onBack={() => navigation.goBack()} />
         <View style={styles.wrap}>
-          {categories.map((interest) => (
+          {categories.map((interest, index) => (
             <InterestChip
-              key={interest}
+              key={`edit-interest-${index}-${interest}`}
               label={interest}
               selected={selected.includes(interest)}
               onPress={() => toggle(interest)}

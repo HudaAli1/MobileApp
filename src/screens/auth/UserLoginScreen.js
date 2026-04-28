@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import FormField from '../../components/FormField';
@@ -14,37 +14,48 @@ export default function UserLoginScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <BrandLogo width={260} height={260} style={styles.logoSpacing} />
-        <Text style={styles.title}>Welcome Back</Text>
-        <Text style={styles.subtitle}>Log in to explore campus events curated for you.</Text>
+      <KeyboardAvoidingView
+        style={styles.root}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.container}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.brandSection}>
+            <BrandLogo width={300} height={300} style={styles.logoSpacing} />
+            <Text style={styles.title}>Welcome Back</Text>
+            <Text style={styles.subtitle}>Log in to explore campus events curated for you.</Text>
+          </View>
 
-        <View style={styles.form}>
-          <FormField
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            placeholder="student@iau.edu.sa"
-            keyboardType="email-address"
-          />
-          <FormField
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Enter your password"
-            secureTextEntry
-          />
-          <PrimaryButton label="Login" onPress={() => navigation.getParent()?.replace('User')} />
-        </View>
+          <View style={styles.form}>
+            <FormField
+              label="Email"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="student@iau.edu.sa"
+              keyboardType="email-address"
+            />
+            <FormField
+              label="Password"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Enter your password"
+              secureTextEntry
+            />
+            <PrimaryButton label="Login" onPress={() => navigation.getParent()?.replace('User')} />
+          </View>
 
-        <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-          <Text style={styles.link}>Don't have an account? Sign Up</Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+            <Text style={styles.link}>Don't have an account? Sign Up</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('AdminLogin')}>
-          <Text style={styles.adminLink}>Admin Login</Text>
-        </TouchableOpacity>
-      </ScrollView>
+          <TouchableOpacity onPress={() => navigation.navigate('AdminLogin')}>
+            <Text style={styles.adminLink}>Admin Login</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -54,23 +65,32 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  root: {
+    flex: 1,
+  },
+  brandSection: {
+    alignItems: 'center',
+    marginBottom: 12,
+  },
   container: {
     flexGrow: 1,
-    justifyContent: 'center',
     padding: spacing.xl,
-    gap: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xl,
   },
   logoSpacing: {
-    marginBottom: 24,
+    marginBottom: 10,
   },
   title: {
     ...typography.screenTitle,
     textAlign: 'center',
     color: colors.primary,
+    marginBottom: 10,
   },
   subtitle: {
     ...typography.body,
     textAlign: 'center',
+    marginBottom: 0,
   },
   form: {
     gap: spacing.md,

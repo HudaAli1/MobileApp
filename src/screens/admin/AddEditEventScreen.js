@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMemo, useState } from 'react';
 import AppHeader from '../../components/AppHeader';
@@ -42,54 +42,62 @@ export default function AddEditEventScreen({ navigation, route }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <AppHeader title={mode === 'edit' ? 'Edit Event' : 'Add New Event'} onBack={() => navigation.goBack()} />
-        <BrandLogo width={180} height={180} style={styles.logoSpacing} />
-        <View style={styles.form}>
-          <FormField
-            label="Event Title"
-            value={form.title}
-            onChangeText={(title) => setForm((current) => ({ ...current, title }))}
-            placeholder="Enter event title"
-          />
-          <FormField
-            label="Description"
-            value={form.description}
-            onChangeText={(description) => setForm((current) => ({ ...current, description }))}
-            placeholder="Event description..."
-            multiline
-          />
-          <FormField
-            label="Date Picker UI"
-            value={form.date}
-            onChangeText={(date) => setForm((current) => ({ ...current, date }))}
-            placeholder="Apr 30, 2026"
-          />
-          <FormField
-            label="Time Picker UI"
-            value={form.time}
-            onChangeText={(time) => setForm((current) => ({ ...current, time }))}
-            placeholder="2:00 PM"
-          />
-          <FormField
-            label="Location"
-            value={form.location}
-            onChangeText={(location) => setForm((current) => ({ ...current, location }))}
-            placeholder="Enter location"
-          />
-          <View style={styles.categoryWrap}>
-            {categories.map((category) => (
-              <InterestChip
-                key={category}
-                label={category}
-                selected={form.category === category}
-                onPress={() => setForm((current) => ({ ...current, category }))}
-              />
-            ))}
+      <KeyboardAvoidingView
+        style={styles.root}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          <AppHeader title={mode === 'edit' ? 'Edit Event' : 'Add New Event'} onBack={() => navigation.goBack()} />
+          <View style={styles.topSection}>
+            <BrandLogo width={300} height={220} style={styles.logoSpacing} />
           </View>
-        </View>
-        <PrimaryButton label="Save" onPress={saveEvent} />
-      </ScrollView>
+
+          <View style={styles.form}>
+            <FormField
+              label="Event Title"
+              value={form.title}
+              onChangeText={(title) => setForm((current) => ({ ...current, title }))}
+              placeholder="Enter event title"
+            />
+            <FormField
+              label="Description"
+              value={form.description}
+              onChangeText={(description) => setForm((current) => ({ ...current, description }))}
+              placeholder="Event description..."
+              multiline
+            />
+            <FormField
+              label="Date Picker UI"
+              value={form.date}
+              onChangeText={(date) => setForm((current) => ({ ...current, date }))}
+              placeholder="Apr 30, 2026"
+            />
+            <FormField
+              label="Time Picker UI"
+              value={form.time}
+              onChangeText={(time) => setForm((current) => ({ ...current, time }))}
+              placeholder="2:00 PM"
+            />
+            <FormField
+              label="Location"
+              value={form.location}
+              onChangeText={(location) => setForm((current) => ({ ...current, location }))}
+              placeholder="Enter location"
+            />
+            <View style={styles.categoryWrap}>
+              {categories.map((category, index) => (
+                <InterestChip
+                  key={`event-category-${index}-${category}`}
+                  label={category}
+                  selected={form.category === category}
+                  onPress={() => setForm((current) => ({ ...current, category }))}
+                />
+              ))}
+            </View>
+          </View>
+          <PrimaryButton label="Save" onPress={saveEvent} />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -99,17 +107,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  root: {
+    flex: 1,
+  },
+  topSection: {
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   container: {
     padding: spacing.lg,
-    gap: spacing.lg,
+    paddingTop: spacing.sm,
+    gap: spacing.md,
     paddingBottom: spacing.xxl,
   },
   form: {
     gap: spacing.md,
   },
   logoSpacing: {
-    marginTop: -spacing.sm,
-    marginBottom: 24,
+    marginBottom: 10,
   },
   categoryWrap: {
     flexDirection: 'row',

@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import FormField from '../../components/FormField';
@@ -28,55 +28,67 @@ export default function SignUpScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <AppHeader title="Create Account" onBack={() => navigation.goBack()} />
-        <BrandLogo width={260} height={260} style={styles.logoSpacing} />
-        <View style={styles.form}>
-          <FormField
-            label="Full Name"
-            value={form.name}
-            onChangeText={(name) => setForm((current) => ({ ...current, name }))}
-            placeholder="Your full name"
-          />
-          <FormField
-            label="Email"
-            value={form.email}
-            onChangeText={(email) => setForm((current) => ({ ...current, email }))}
-            placeholder="student@iau.edu.sa"
-            keyboardType="email-address"
-          />
-          <FormField
-            label="Password"
-            value={form.password}
-            onChangeText={(password) => setForm((current) => ({ ...current, password }))}
-            placeholder="Create a password"
-            secureTextEntry
-          />
-          <FormField
-            label="Confirm Password"
-            value={form.confirmPassword}
-            onChangeText={(confirmPassword) => setForm((current) => ({ ...current, confirmPassword }))}
-            placeholder="Confirm your password"
-            secureTextEntry
-          />
-        </View>
-
-        <View>
-          <Text style={styles.sectionTitle}>Select Your Interests</Text>
-          <View style={styles.chipWrap}>
-            {categories.map((interest) => (
-              <InterestChip
-                key={interest}
-                label={interest}
-                selected={selectedInterests.includes(interest)}
-                onPress={() => toggleInterest(interest)}
-              />
-            ))}
+      <KeyboardAvoidingView
+        style={styles.root}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.container}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <AppHeader title="Create Account" onBack={() => navigation.goBack()} />
+          <View style={styles.topSection}>
+            <BrandLogo width={300} height={220} style={styles.logoSpacing} />
           </View>
-        </View>
 
-        <PrimaryButton label="Create Account" onPress={() => navigation.getParent()?.replace('User')} />
-      </ScrollView>
+          <View style={styles.form}>
+            <FormField
+              label="Full Name"
+              value={form.name}
+              onChangeText={(name) => setForm((current) => ({ ...current, name }))}
+              placeholder="Your full name"
+            />
+            <FormField
+              label="Email"
+              value={form.email}
+              onChangeText={(email) => setForm((current) => ({ ...current, email }))}
+              placeholder="student@iau.edu.sa"
+              keyboardType="email-address"
+            />
+            <FormField
+              label="Password"
+              value={form.password}
+              onChangeText={(password) => setForm((current) => ({ ...current, password }))}
+              placeholder="Create a password"
+              secureTextEntry
+            />
+            <FormField
+              label="Confirm Password"
+              value={form.confirmPassword}
+              onChangeText={(confirmPassword) => setForm((current) => ({ ...current, confirmPassword }))}
+              placeholder="Confirm your password"
+              secureTextEntry
+            />
+          </View>
+
+          <View>
+            <Text style={styles.sectionTitle}>Select Your Interests</Text>
+            <View style={styles.chipWrap}>
+              {categories.map((interest, index) => (
+                <InterestChip
+                  key={`signup-interest-${index}-${interest}`}
+                  label={interest}
+                  selected={selectedInterests.includes(interest)}
+                  onPress={() => toggleInterest(interest)}
+                />
+              ))}
+            </View>
+          </View>
+
+          <PrimaryButton label="Create Account" onPress={() => navigation.getParent()?.replace('User')} />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -86,23 +98,31 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  root: {
+    flex: 1,
+  },
+  topSection: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   container: {
     padding: spacing.xl,
-    gap: spacing.lg,
+    paddingTop: spacing.sm,
+    gap: spacing.md,
   },
   form: {
     gap: spacing.md,
   },
   logoSpacing: {
-    marginTop: -spacing.sm,
-    marginBottom: 24,
+    marginBottom: 8,
   },
   sectionTitle: {
     ...typography.sectionTitle,
-    marginBottom: spacing.md,
+    marginBottom: 12,
   },
   chipWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    marginBottom: 8,
   },
 });

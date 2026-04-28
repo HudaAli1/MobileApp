@@ -1,5 +1,5 @@
-import { StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { colors, shadows } from '../constants/colors';
+import { Platform, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { colors } from '../constants/colors';
 import { radii, spacing } from '../constants/spacing';
 import { typography } from '../constants/typography';
 
@@ -23,7 +23,18 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
-    ...shadows.card,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#17306C',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.08,
+        shadowRadius: 20,
+      },
+      android: {
+        elevation: 5,
+      },
+      default: {},
+    }),
   },
   label: {
     ...typography.button,

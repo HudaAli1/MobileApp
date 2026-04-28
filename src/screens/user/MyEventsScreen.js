@@ -23,9 +23,9 @@ export default function MyEventsScreen({ navigation }) {
           <SectionTitle title="Upcoming Events" />
           <View style={styles.list}>
             {upcomingEvents.length ? (
-              upcomingEvents.map((event) => (
+              upcomingEvents.map((event, index) => (
                 <EventCard
-                  key={event.id}
+                  key={`upcoming-event-${event.id ?? index}`}
                   event={event}
                   onPress={() => navigation.navigate('EventDetails', { eventId: event.id })}
                 />
@@ -42,9 +42,9 @@ export default function MyEventsScreen({ navigation }) {
         <View>
           <SectionTitle title="Past Events" />
           <View style={styles.list}>
-            {pastEvents.map((event) => (
+            {pastEvents.map((event, index) => (
               <EventCard
-                key={event.id}
+                key={`past-event-${event.id ?? index}`}
                 event={event}
                 onPress={() => navigation.navigate('EventDetails', { eventId: event.id })}
                 action={

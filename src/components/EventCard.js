@@ -1,6 +1,6 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows } from '../constants/colors';
+import { colors } from '../constants/colors';
 import { radii, spacing } from '../constants/spacing';
 import { typography } from '../constants/typography';
 import Badge from './Badge';
@@ -36,7 +36,18 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.border,
-    ...shadows.card,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#17306C',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.08,
+        shadowRadius: 20,
+      },
+      android: {
+        elevation: 5,
+      },
+      default: {},
+    }),
   },
   compact: {
     minHeight: 110,

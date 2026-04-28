@@ -1,6 +1,6 @@
-import { StyleSheet, TextInput, View } from 'react-native';
+import { Platform, StyleSheet, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows } from '../constants/colors';
+import { colors } from '../constants/colors';
 import { radii, spacing } from '../constants/spacing';
 
 export default function SearchBar({ value, onChangeText, placeholder = 'Search events...' }) {
@@ -29,7 +29,18 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     borderWidth: 1,
     borderColor: colors.border,
-    ...shadows.soft,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#1F3C88',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.05,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 3,
+      },
+      default: {},
+    }),
   },
   input: {
     flex: 1,

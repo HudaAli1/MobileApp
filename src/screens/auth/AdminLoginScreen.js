@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import FormField from '../../components/FormField';
@@ -15,28 +15,36 @@ export default function AdminLoginScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <AppHeader title="Admin Login" onBack={() => navigation.goBack()} />
-        <BrandLogo width={260} height={260} style={styles.logoSpacing} />
-        <Text style={styles.subtitle}>Sign in to manage campus events and organizer tasks.</Text>
-        <View style={styles.form}>
-          <FormField
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            placeholder="admin@iau.edu.sa"
-            keyboardType="email-address"
-          />
-          <FormField
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Enter your password"
-            secureTextEntry
-          />
-          <PrimaryButton label="Login" onPress={() => navigation.getParent()?.replace('Admin')} />
-        </View>
-      </ScrollView>
+      <KeyboardAvoidingView
+        style={styles.root}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          <AppHeader title="Admin Login" onBack={() => navigation.goBack()} />
+          <View style={styles.topSection}>
+            <BrandLogo width={300} height={300} style={styles.logoSpacing} />
+            <Text style={styles.subtitle}>Sign in to manage campus events and organizer tasks.</Text>
+          </View>
+
+          <View style={styles.form}>
+            <FormField
+              label="Email"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="admin@iau.edu.sa"
+              keyboardType="email-address"
+            />
+            <FormField
+              label="Password"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Enter your password"
+              secureTextEntry
+            />
+            <PrimaryButton label="Login" onPress={() => navigation.getParent()?.replace('Admin')} />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -46,16 +54,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  root: {
+    flex: 1,
+  },
+  topSection: {
+    alignItems: 'center',
+    marginBottom: 10,
+  },
   container: {
     padding: spacing.xl,
-    gap: spacing.lg,
+    paddingTop: spacing.sm,
+    gap: spacing.md,
   },
   subtitle: {
     ...typography.body,
+    textAlign: 'center',
+    marginBottom: 0,
   },
   logoSpacing: {
-    marginTop: -spacing.sm,
-    marginBottom: 24,
+    marginBottom: 10,
   },
   form: {
     gap: spacing.md,
