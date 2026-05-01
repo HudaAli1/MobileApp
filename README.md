@@ -1,42 +1,55 @@
-# Eventia - Milestone 3
+# Eventia
 
-Eventia is a university campus event organizer mobile application built with Expo and React Native.
+Eventia is a React Native mobile application for organizing and discovering campus events.
 
-This repository is prepared for Milestone 3 only:
-- UI implementation
-- Navigation structure
-- Reusable components
-- Mock data
-- Demo-ready student and admin screens
+Current scope:
+- College of Science & Humanities - Jubail
+- Imam Abdulrahman Bin Faisal University
 
-Milestone 4 features such as backend integration, persistent storage, and advanced services are intentionally not included yet.
+## Milestone 4 Summary
 
-## Implemented Screens
+This version includes the full Milestone 3 UI and navigation, plus Milestone 4 core functionality:
 
-- Splash Screen
-- User Login Screen
-- Sign Up Screen
-- Home Screen
-- Event Details Screen
-- My Events Screen
-- Rating & Feedback Screen
-- Calendar Screen
-- Settings Screen
-- Edit Interests Screen
-- Edit Profile Screen
-- Change Password Screen
-- Admin Login Screen
-- Admin Dashboard Screen
-- Add/Edit Event Screen
+- Local authentication for students and admin
+- AsyncStorage persistence for users, session, events, registrations, interests, and ratings
+- Simulated email verification after sign up
+- Forgot password flow with local verification code
+- Arabic local event data for Jubail college only
+- Event registration and local rating management
+- Saudi public holidays in Calendar using `Nager.Date`
+- User location check using `expo-location`
+- Reverse geocoding using `OpenStreetMap Nominatim`
+- Role-based access for admin and student flows
+
+## Default Login Credentials
+
+Admin:
+- Email: `admin@iau.edu.sa`
+- Password: `Admin123`
+
+Demo student:
+- Email: `hind.alotaibi@iau.edu.sa`
+- Password: `Student123`
+
+## Main Features
+
+- Student authentication and session handling
+- Admin authentication and event management
+- Local Arabic event feed
+- Calendar screen with official Saudi holidays
+- Location status with approximate distance from the college
+- Registration, interests, and rating flows
 
 ## Tech Stack
 
 - Expo
 - React Native
 - React Navigation
-- JavaScript
-- StyleSheet
-- Flexbox
+- Context API
+- AsyncStorage
+- Axios
+- Expo Calendar
+- Expo Location
 
 ## Project Structure
 
@@ -51,7 +64,11 @@ src/
     auth/
     user/
     admin/
-  types/
+  services/
+    api/
+    calendar/
+    location/
+    storage/
   utils/
 ```
 
@@ -63,9 +80,3 @@ npx expo start
 ```
 
 Open the app in Expo Go or an emulator.
-
-## Notes
-
-- The app uses mock user and event data for Milestone 3 presentation.
-- Branding uses `assets/updatedlogo.png` as the single in-app logo source.
-- The UI follows the provided prototype flow for Milestone 3 submission.
