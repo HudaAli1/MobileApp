@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import AppHeader from '../../components/AppHeader';
@@ -12,10 +12,11 @@ import { typography } from '../../constants/typography';
 
 export default function RatingFeedbackScreen({ navigation, route }) {
   const { eventId } = route.params;
-  const { events } = useAppContext();
+  const { events, submitRating, ratings } = useAppContext();
   const event = events.find((item) => item.id === eventId);
-  const [rating, setRating] = useState(0);
-  const [feedback, setFeedback] = useState('');
+  const existingRating = ratings.find((item) => item.eventId === eventId);
+  const [rating, setRating] = useState(existingRating?.value ?? 0);
+  const [feedback, setFeedback] = useState(existingRating?.comment ?? '');
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -30,7 +31,14 @@ export default function RatingFeedbackScreen({ navigation, route }) {
           placeholder="Write your comment here..."
           multiline
         />
-        <PrimaryButton label="Submit" onPress={() => navigation.goBack()} />
+        <PrimaryButton
+          label="Submit"
+          onPress={async () => {
+            await submitRating({ eventId, value: rating, comment: feedback });
+            Alert.alert('التقييم', 'تم إرسال التقييم بنجاح');
+            navigation.goBack();
+          }}
+        />
       </ScrollView>
     </SafeAreaView>
   );

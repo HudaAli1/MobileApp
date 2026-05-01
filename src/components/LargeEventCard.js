@@ -1,16 +1,14 @@
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../constants/colors';
 import { radii, spacing } from '../constants/spacing';
 import { typography } from '../constants/typography';
 import Badge from './Badge';
+import EventImage from './EventImage';
 
 export default function LargeEventCard({ event, onPress }) {
   return (
     <TouchableOpacity onPress={onPress} style={styles.card} activeOpacity={0.92}>
-      <View style={styles.image}>
-        <Ionicons name="calendar-outline" size={38} color={colors.primary} />
-      </View>
+      <EventImage event={event} style={styles.image} />
       <View style={styles.content}>
         <Badge label={event.category} />
         <Text style={styles.title}>{event.title}</Text>
@@ -49,9 +47,6 @@ const styles = StyleSheet.create({
   },
   image: {
     height: 140,
-    backgroundColor: '#EFF3FF',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   content: {
     padding: spacing.md,

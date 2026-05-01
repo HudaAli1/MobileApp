@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AppHeader from '../../components/AppHeader';
 import BrandLogo from '../../components/BrandLogo';
@@ -10,7 +10,11 @@ import { radii, spacing } from '../../constants/spacing';
 import { typography } from '../../constants/typography';
 
 export default function SettingsScreen({ navigation }) {
-  const { user } = useAppContext();
+  const { user, logout, locationStatus, fetchLocation } = useAppContext();
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -23,15 +27,28 @@ export default function SettingsScreen({ navigation }) {
         <View style={styles.profileCard}>
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
+          <Text style={styles.meta}>{user.universityId}</Text>
+          <Text style={styles.meta}>{user.major}</Text>
+          <Text style={styles.meta}>{locationStatus}</Text>
         </View>
         <View style={styles.actions}>
           <SecondaryButton label="Edit Profile" onPress={() => navigation.navigate('EditProfile')} />
           <SecondaryButton label="Change Password" onPress={() => navigation.navigate('ChangePassword')} />
           <SecondaryButton label="My Events" onPress={() => navigation.navigate('MyEvents')} />
           <SecondaryButton label="Edit Interests" onPress={() => navigation.navigate('EditInterests')} />
+          <SecondaryButton
+            label="Check Location"
+            onPress={async () => {
+              const result = await fetchLocation();
+              Alert.alert('الموقع', result.status);
+            }}
+          />
           <PrimaryButton
             label="Logout"
-            onPress={() => navigation.getParent()?.getParent()?.replace('Auth')}
+            onPress={async () => {
+              await logout();
+              navigation.getParent()?.getParent()?.replace('Auth');
+            }}
             style={styles.logout}
           />
         </View>
@@ -70,6 +87,10 @@ const styles = StyleSheet.create({
   },
   email: {
     ...typography.body,
+    marginTop: spacing.xs,
+  },
+  meta: {
+    ...typography.caption,
     marginTop: spacing.xs,
   },
   actions: {

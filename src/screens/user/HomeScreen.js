@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMemo, useState } from 'react';
 import BrandLogo from '../../components/BrandLogo';
@@ -13,7 +13,7 @@ import { spacing } from '../../constants/spacing';
 import { typography } from '../../constants/typography';
 
 export default function HomeScreen({ navigation }) {
-  const { events, user } = useAppContext();
+  const { events, user, loadingEvents, eventsError, refreshEventsFromApi } = useAppContext();
   const [search, setSearch] = useState('');
 
   const filteredEvents = useMemo(() => {
@@ -29,8 +29,8 @@ export default function HomeScreen({ navigation }) {
   }, [events, search]);
 
   const interestEvents = useMemo(
-    () => getInterestEvents(filteredEvents, user.interests),
-    [filteredEvents, user.interests],
+    () => getInterestEvents(filteredEvents, user?.interests || []),
+    [filteredEvents, user?.interests],
   );
 
   return (
@@ -43,6 +43,12 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         <SearchBar value={search} onChangeText={setSearch} />
+        {loadingEvents ? <Text style={styles.statusText}>Loading events...</Text> : null}
+        {eventsError ? (
+          <TouchableOpacity onPress={() => refreshEventsFromApi()}>
+            <Text style={styles.errorText}>{eventsError}</Text>
+          </TouchableOpacity>
+        ) : null}
 
         <View>
           <SectionTitle title="Based on Your Interests" />
@@ -100,6 +106,14 @@ const styles = StyleSheet.create({
     ...typography.body,
     marginTop: 10,
     textAlign: 'center',
+  },
+  statusText: {
+    ...typography.body,
+    color: colors.secondary,
+  },
+  errorText: {
+    ...typography.caption,
+    color: colors.danger,
   },
   horizontalList: {
     paddingRight: spacing.lg,

@@ -11,6 +11,8 @@ export default function FormField({
   secureTextEntry,
   multiline,
   keyboardType,
+  error,
+  autoCapitalize,
 }) {
   return (
     <View style={styles.wrapper}>
@@ -23,9 +25,11 @@ export default function FormField({
         secureTextEntry={secureTextEntry}
         multiline={multiline}
         keyboardType={keyboardType}
+        autoCapitalize={autoCapitalize || 'sentences'}
         textAlignVertical={multiline ? 'top' : 'center'}
-        style={[styles.input, multiline && styles.multiline]}
+        style={[styles.input, multiline && styles.multiline, error && styles.inputError]}
       />
+      {error ? <Text style={styles.error}>{error}</Text> : null}
     </View>
   );
 }
@@ -49,5 +53,12 @@ const styles = StyleSheet.create({
   },
   multiline: {
     minHeight: 120,
+  },
+  inputError: {
+    borderColor: colors.danger,
+  },
+  error: {
+    ...typography.caption,
+    color: colors.danger,
   },
 });

@@ -1,13 +1,14 @@
 export const categories = [
-  'Computer Science',
-  'Mathematics',
-  'English',
-  'Physics',
-  'Energy',
+  'علوم الحاسب',
+  'الرياضيات',
+  'اللغة الإنجليزية',
+  'الفيزياء',
+  'الطاقة',
+  'عام',
 ];
 
 export function formatEventDate(event) {
-  return `${event.date} • ${event.time}`;
+  return `${event.date} - ${event.time}`;
 }
 
 export function getEventsForDate(events, date) {

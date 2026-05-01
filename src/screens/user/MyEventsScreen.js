@@ -10,7 +10,7 @@ import { spacing } from '../../constants/spacing';
 import { typography } from '../../constants/typography';
 
 export default function MyEventsScreen({ navigation }) {
-  const { events } = useAppContext();
+  const { events, ratings } = useAppContext();
   const upcomingEvents = events.filter((event) => !event.isPast && (event.registered || event.interested));
   const pastEvents = events.filter((event) => event.isPast);
 
@@ -42,18 +42,21 @@ export default function MyEventsScreen({ navigation }) {
         <View>
           <SectionTitle title="Past Events" />
           <View style={styles.list}>
-            {pastEvents.map((event, index) => (
+            {pastEvents.map((event, index) => {
+              const hasRating = ratings.some((item) => item.eventId === event.id);
+              return (
               <EventCard
                 key={`past-event-${event.id ?? index}`}
                 event={event}
                 onPress={() => navigation.navigate('EventDetails', { eventId: event.id })}
                 action={
                   <TouchableOpacity onPress={() => navigation.navigate('RatingFeedback', { eventId: event.id })}>
-                    <Text style={styles.rateLink}>Rate Event</Text>
+                    <Text style={styles.rateLink}>{hasRating ? 'Edit Rating' : 'Rate Event'}</Text>
                   </TouchableOpacity>
                 }
               />
-            ))}
+              );
+            })}
           </View>
         </View>
       </ScrollView>

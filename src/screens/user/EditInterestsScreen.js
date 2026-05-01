@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import AppHeader from '../../components/AppHeader';
@@ -35,8 +35,9 @@ export default function EditInterestsScreen({ navigation }) {
         </View>
         <PrimaryButton
           label="Save Changes"
-          onPress={() => {
-            updateInterests(selected);
+          onPress={async () => {
+            await updateInterests(selected);
+            Alert.alert('الاهتمامات', 'تم تحديث الاهتمامات بنجاح');
             navigation.goBack();
           }}
         />

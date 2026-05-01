@@ -1,16 +1,14 @@
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../constants/colors';
 import { radii, spacing } from '../constants/spacing';
 import { typography } from '../constants/typography';
 import Badge from './Badge';
+import EventImage from './EventImage';
 
 export default function EventCard({ event, onPress, action, compact = false }) {
   return (
     <TouchableOpacity onPress={onPress} style={[styles.card, compact && styles.compact]} activeOpacity={0.9}>
-      <View style={styles.image}>
-        <Ionicons name="image-outline" size={compact ? 24 : 30} color={colors.secondary} />
-      </View>
+      <EventImage event={event} compact style={styles.image} />
       <View style={styles.content}>
         <View style={styles.topRow}>
           <Text style={styles.title}>{event.title}</Text>
@@ -54,9 +52,6 @@ const styles = StyleSheet.create({
   },
   image: {
     width: 96,
-    backgroundColor: '#EAF0FF',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   content: {
     flex: 1,

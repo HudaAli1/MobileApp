@@ -1,8 +1,8 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../../components/AppHeader';
 import Badge from '../../components/Badge';
+import EventImage from '../../components/EventImage';
 import PrimaryButton from '../../components/PrimaryButton';
 import SecondaryButton from '../../components/SecondaryButton';
 import { useAppContext } from '../../context/AppContext';
@@ -24,7 +24,7 @@ export default function EventDetailsScreen({ navigation, route }) {
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
         <AppHeader title="Event Details" onBack={() => navigation.goBack()} />
         <View style={styles.hero}>
-          <Ionicons name="image-outline" size={54} color={colors.secondary} />
+          <EventImage event={event} style={styles.heroImage} />
           {event.registered ? <Badge label="Registered" type="registered" /> : null}
         </View>
         <Text style={styles.title}>{event.title}</Text>
@@ -42,11 +42,17 @@ export default function EventDetailsScreen({ navigation, route }) {
 
         <SecondaryButton
           label={event.interested ? 'Marked as Interested' : 'Mark as Interested'}
-          onPress={() => toggleInterested(event.id)}
+          onPress={async () => {
+            const result = await toggleInterested(event.id);
+            Alert.alert('الاهتمامات', result.message);
+          }}
         />
         <PrimaryButton
           label={event.registered ? 'Cancel Registration' : 'Register'}
-          onPress={() => toggleRegistration(event.id)}
+          onPress={async () => {
+            const result = await toggleRegistration(event.id);
+            Alert.alert('الفعالية', result.message);
+          }}
           style={event.registered ? styles.cancelButton : null}
         />
       </ScrollView>
@@ -65,11 +71,11 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxl,
   },
   hero: {
+    gap: spacing.md,
+  },
+  heroImage: {
     height: 220,
     borderRadius: radii.xl,
-    backgroundColor: '#EAF0FF',
-    alignItems: 'center',
-    justifyContent: 'center',
     gap: spacing.md,
   },
   title: {

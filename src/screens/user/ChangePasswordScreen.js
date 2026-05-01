@@ -1,16 +1,39 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import AppHeader from '../../components/AppHeader';
 import FormField from '../../components/FormField';
 import PrimaryButton from '../../components/PrimaryButton';
+import { useAppContext } from '../../context/AppContext';
+import { validatePasswordChange } from '../../utils/authValidation';
 import { colors } from '../../constants/colors';
 import { spacing } from '../../constants/spacing';
 
 export default function ChangePasswordScreen({ navigation }) {
+  const { changePassword } = useAppContext();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [errors, setErrors] = useState({});
+
+  const handleSave = async () => {
+    const nextErrors = validatePasswordChange({
+      currentPassword,
+      newPassword,
+      confirmNewPassword,
+    });
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length) {
+      return;
+    }
+
+    const result = await changePassword({ currentPassword, newPassword });
+    Alert.alert('كلمة المرور', result.message);
+    if (result.success) {
+      navigation.goBack();
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -23,6 +46,8 @@ export default function ChangePasswordScreen({ navigation }) {
             onChangeText={setCurrentPassword}
             placeholder="Enter current password"
             secureTextEntry
+            autoCapitalize="none"
+            error={errors.currentPassword}
           />
           <FormField
             label="New Password"
@@ -30,6 +55,8 @@ export default function ChangePasswordScreen({ navigation }) {
             onChangeText={setNewPassword}
             placeholder="Enter new password"
             secureTextEntry
+            autoCapitalize="none"
+            error={errors.newPassword}
           />
           <FormField
             label="Confirm New Password"
@@ -37,9 +64,11 @@ export default function ChangePasswordScreen({ navigation }) {
             onChangeText={setConfirmNewPassword}
             placeholder="Confirm new password"
             secureTextEntry
+            autoCapitalize="none"
+            error={errors.confirmNewPassword}
           />
         </View>
-        <PrimaryButton label="Save" onPress={() => navigation.goBack()} />
+        <PrimaryButton label="Save" onPress={handleSave} />
       </ScrollView>
     </SafeAreaView>
   );

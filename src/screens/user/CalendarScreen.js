@@ -1,11 +1,12 @@
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AppHeader from '../../components/AppHeader';
 import EventCard from '../../components/EventCard';
 import EmptyState from '../../components/EmptyState';
 import SectionTitle from '../../components/SectionTitle';
 import { useAppContext } from '../../context/AppContext';
+import { fetchSaudiPublicHolidays } from '../../services/api/holidayApi';
 import { getEventsForDate } from '../../utils/eventHelpers';
 import { colors } from '../../constants/colors';
 import { radii, spacing } from '../../constants/spacing';
@@ -22,8 +23,32 @@ const calendarDays = [
 export default function CalendarScreen({ navigation }) {
   const { events } = useAppContext();
   const [selectedDate, setSelectedDate] = useState('2026-04-24');
+  const [holidays, setHolidays] = useState([]);
+  const [loadingHolidays, setLoadingHolidays] = useState(true);
+  const [holidayError, setHolidayError] = useState('');
+  const [fallbackUsed, setFallbackUsed] = useState(false);
+
+  const loadHolidays = async () => {
+    setLoadingHolidays(true);
+    setHolidayError('');
+    const result = await fetchSaudiPublicHolidays(2026);
+    setHolidays(result.holidays);
+    setFallbackUsed(result.fallbackUsed);
+    if (result.fallbackUsed) {
+      setHolidayError('تم عرض العطل الرسمية المحفوظة محليًا بسبب تعذر الاتصال بالخدمة.');
+    }
+    setLoadingHolidays(false);
+  };
+
+  useEffect(() => {
+    void loadHolidays();
+  }, []);
 
   const selectedEvents = useMemo(() => getEventsForDate(events, selectedDate), [events, selectedDate]);
+  const selectedHolidays = useMemo(
+    () => holidays.filter((holiday) => holiday.date === selectedDate),
+    [holidays, selectedDate],
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -40,6 +65,7 @@ export default function CalendarScreen({ navigation }) {
             {calendarDays.map((date) => {
               const number = date.split('-')[2];
               const hasEvent = events.some((event) => event.fullDate === date);
+              const hasHoliday = holidays.some((holiday) => holiday.date === date);
               const selected = selectedDate === date;
               return (
                 <TouchableOpacity
@@ -49,6 +75,7 @@ export default function CalendarScreen({ navigation }) {
                 >
                   <Text style={[styles.dayText, selected && styles.selectedDayText]}>{String(Number(number))}</Text>
                   {hasEvent ? <View style={[styles.dot, selected && styles.selectedDot]} /> : null}
+                  {hasHoliday ? <View style={[styles.holidayDot, selected && styles.selectedHolidayDot]} /> : null}
                 </TouchableOpacity>
               );
             })}
@@ -56,7 +83,7 @@ export default function CalendarScreen({ navigation }) {
         </View>
 
         <View>
-          <SectionTitle title="Events on Selected Date" />
+          <SectionTitle title="فعاليات الكلية في اليوم المحدد" />
           <View style={styles.list}>
             {selectedEvents.length ? (
               selectedEvents.map((event, index) => (
@@ -67,9 +94,34 @@ export default function CalendarScreen({ navigation }) {
                 />
               ))
             ) : (
-              <EmptyState title="No events on this date" description="Choose another day to see scheduled campus activities." />
+              <EmptyState title="لا توجد فعاليات في هذا اليوم" description="اختاري يومًا آخر لعرض فعاليات الكلية." />
             )}
           </View>
+        </View>
+
+        <View>
+          <SectionTitle title="العطل الرسمية" />
+          {loadingHolidays ? <Text style={styles.statusText}>جاري تحميل العطل الرسمية...</Text> : null}
+          {holidayError ? (
+            <TouchableOpacity onPress={() => void loadHolidays()}>
+              <Text style={styles.errorText}>{holidayError}</Text>
+              <Text style={styles.retryText}>إعادة المحاولة</Text>
+            </TouchableOpacity>
+          ) : null}
+          <View style={styles.list}>
+            {selectedHolidays.length ? (
+              selectedHolidays.map((holiday) => (
+                <View key={holiday.id} style={styles.holidayCard}>
+                  <Text style={styles.holidayLabel}>إجازة رسمية</Text>
+                  <Text style={styles.holidayTitle}>{holiday.localName || holiday.name}</Text>
+                  <Text style={styles.holidayDate}>{holiday.date}</Text>
+                </View>
+              ))
+            ) : !loadingHolidays && !selectedHolidays.length ? (
+              <EmptyState title="لا توجد عطلة رسمية في هذا اليوم" description="ستظهر العطل الرسمية السعودية هنا عند توافق التاريخ." />
+            ) : null}
+          </View>
+          {fallbackUsed ? <Text style={styles.noteText}>يتم الآن عرض نسخة محلية احتياطية من العطل الرسمية.</Text> : null}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -133,10 +185,57 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     marginTop: 4,
   },
+  holidayDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: colors.danger,
+    marginTop: 3,
+  },
   selectedDot: {
     backgroundColor: colors.surface,
   },
+  selectedHolidayDot: {
+    backgroundColor: '#FFD8D8',
+  },
   list: {
     gap: spacing.md,
+  },
+  statusText: {
+    ...typography.body,
+    color: colors.secondary,
+  },
+  errorText: {
+    ...typography.caption,
+    color: colors.danger,
+  },
+  retryText: {
+    ...typography.label,
+    color: colors.primary,
+    marginTop: spacing.xs,
+  },
+  noteText: {
+    ...typography.caption,
+    color: colors.muted,
+  },
+  holidayCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radii.lg,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: spacing.xs,
+  },
+  holidayLabel: {
+    ...typography.caption,
+    color: colors.danger,
+    fontWeight: '700',
+  },
+  holidayTitle: {
+    ...typography.cardTitle,
+  },
+  holidayDate: {
+    ...typography.caption,
+    color: colors.muted,
   },
 });

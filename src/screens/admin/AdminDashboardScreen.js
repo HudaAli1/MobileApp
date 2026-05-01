@@ -1,6 +1,7 @@
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect } from 'react';
 import AppHeader from '../../components/AppHeader';
 import BrandLogo from '../../components/BrandLogo';
 import SecondaryButton from '../../components/SecondaryButton';
@@ -10,7 +11,17 @@ import { radii, spacing } from '../../constants/spacing';
 import { typography } from '../../constants/typography';
 
 export default function AdminDashboardScreen({ navigation }) {
-  const { events, deleteEvent } = useAppContext();
+  const { user, events, deleteEvent, logout } = useAppContext();
+
+  useEffect(() => {
+    if (user?.role === 'admin') return;
+    Alert.alert('صلاحية الدخول', 'لا يمكن الوصول إلى لوحة الإدارة إلا من خلال حساب إداري.');
+    navigation.getParent()?.replace('Auth');
+  }, [navigation, user]);
+
+  if (user?.role !== 'admin') {
+    return null;
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -18,7 +29,10 @@ export default function AdminDashboardScreen({ navigation }) {
         <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
           <AppHeader
             title="Manage Events"
-            rightAction={() => navigation.getParent()?.replace('Auth')}
+            rightAction={async () => {
+              await logout();
+              navigation.getParent()?.replace('Auth');
+            }}
             rightLabel="Logout"
           />
           <View style={styles.topSection}>
@@ -28,7 +42,7 @@ export default function AdminDashboardScreen({ navigation }) {
             <View key={event.id} style={styles.card}>
               <View style={styles.textWrap}>
                 <Text style={styles.title}>{event.title}</Text>
-                <Text style={styles.meta}>{event.date} • {event.location}</Text>
+                <Text style={styles.meta}>{event.date} - {event.location}</Text>
               </View>
               <View style={styles.actions}>
                 <SecondaryButton
@@ -36,7 +50,22 @@ export default function AdminDashboardScreen({ navigation }) {
                   onPress={() => navigation.navigate('AddEditEvent', { eventId: event.id, mode: 'edit' })}
                   style={styles.smallButton}
                 />
-                <TouchableOpacity style={styles.deleteButton} onPress={() => deleteEvent(event.id)}>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() =>
+                    Alert.alert('حذف الفعالية', 'هل أنت متأكد من حذف الفعالية؟', [
+                      { text: 'إلغاء', style: 'cancel' },
+                      {
+                        text: 'حذف',
+                        style: 'destructive',
+                        onPress: async () => {
+                          await deleteEvent(event.id);
+                          Alert.alert('حذف الفعالية', 'تم حذف الفعالية بنجاح');
+                        },
+                      },
+                    ])
+                  }
+                >
                   <Text style={styles.deleteText}>Delete</Text>
                 </TouchableOpacity>
               </View>

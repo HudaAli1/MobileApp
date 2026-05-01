@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import AppHeader from '../../components/AppHeader';
@@ -10,8 +10,8 @@ import { spacing } from '../../constants/spacing';
 
 export default function EditProfileScreen({ navigation }) {
   const { user, updateProfile } = useAppContext();
-  const [name, setName] = useState(user.name);
-  const [email, setEmail] = useState(user.email);
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -29,8 +29,9 @@ export default function EditProfileScreen({ navigation }) {
         </View>
         <PrimaryButton
           label="Save"
-          onPress={() => {
-            updateProfile({ name, email });
+          onPress={async () => {
+            await updateProfile({ name, email });
+            Alert.alert('الحساب', 'تم حفظ معلومات الحساب بنجاح');
             navigation.goBack();
           }}
         />

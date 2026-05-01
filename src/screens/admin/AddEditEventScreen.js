@@ -1,4 +1,4 @@
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMemo, useState } from 'react';
 import AppHeader from '../../components/AppHeader';
@@ -8,6 +8,7 @@ import InterestChip from '../../components/InterestChip';
 import PrimaryButton from '../../components/PrimaryButton';
 import { useAppContext } from '../../context/AppContext';
 import { categories } from '../../utils/eventHelpers';
+import { getImageKeyForCategory } from '../../utils/eventImages';
 import { colors } from '../../constants/colors';
 import { spacing } from '../../constants/spacing';
 
@@ -19,11 +20,11 @@ export default function AddEditEventScreen({ navigation, route }) {
     existingEvent || {
       title: '',
       description: '',
-      date: 'Apr 30, 2026',
-      time: '2:00 PM',
+      date: '30 أبريل 2026',
+      time: '2:00 م',
       location: '',
-      category: 'Computer Science',
-      image: null,
+      category: 'علوم الحاسب',
+      imageKey: 'computer-science',
       interested: false,
       registered: false,
       isPast: false,
@@ -31,11 +32,18 @@ export default function AddEditEventScreen({ navigation, route }) {
     },
   );
 
-  const saveEvent = () => {
+  const saveEvent = async () => {
+    const payload = {
+      ...form,
+      imageKey: form.imageKey || getImageKeyForCategory(form.category),
+      fullDate: form.fullDate || '2026-04-30',
+    };
     if (mode === 'edit' && eventId) {
-      updateEvent(eventId, form);
+      await updateEvent(eventId, payload);
+      Alert.alert('الفعاليات', 'تم تعديل الفعالية بنجاح');
     } else {
-      addEvent(form);
+      await addEvent(payload);
+      Alert.alert('الفعاليات', 'تمت إضافة الفعالية بنجاح');
     }
     navigation.goBack();
   };
@@ -70,13 +78,13 @@ export default function AddEditEventScreen({ navigation, route }) {
               label="Date Picker UI"
               value={form.date}
               onChangeText={(date) => setForm((current) => ({ ...current, date }))}
-              placeholder="Apr 30, 2026"
+              placeholder="30 أبريل 2026"
             />
             <FormField
               label="Time Picker UI"
               value={form.time}
               onChangeText={(time) => setForm((current) => ({ ...current, time }))}
-              placeholder="2:00 PM"
+              placeholder="2:00 م"
             />
             <FormField
               label="Location"
@@ -87,11 +95,17 @@ export default function AddEditEventScreen({ navigation, route }) {
             <View style={styles.categoryWrap}>
               {categories.map((category, index) => (
                 <InterestChip
-                  key={`event-category-${index}-${category}`}
-                  label={category}
-                  selected={form.category === category}
-                  onPress={() => setForm((current) => ({ ...current, category }))}
-                />
+                    key={`event-category-${index}-${category}`}
+                    label={category}
+                    selected={form.category === category}
+                    onPress={() =>
+                      setForm((current) => ({
+                        ...current,
+                        category,
+                        imageKey: getImageKeyForCategory(category),
+                      }))
+                    }
+                  />
               ))}
             </View>
           </View>
