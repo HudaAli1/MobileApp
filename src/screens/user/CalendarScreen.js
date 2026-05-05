@@ -116,6 +116,7 @@ export default function CalendarScreen({ navigation }) {
               <Text key={`weekday-${index}-${day}`} style={styles.weekday}>{day}</Text>
             ))}
           </View>
+
           <View style={styles.grid}>
             {calendarDays.map((item) => {
               if (item.type === 'blank') {
@@ -163,6 +164,7 @@ export default function CalendarScreen({ navigation }) {
         <View>
           <SectionTitle title="العطل الرسمية" />
           {loadingHolidays ? <Text style={styles.statusText}>جاري تحميل العطل الرسمية...</Text> : null}
+
           {holidayError ? (
             <View style={styles.feedbackBlock}>
               <Text style={styles.errorText}>{holidayError}</Text>
@@ -171,6 +173,7 @@ export default function CalendarScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           ) : null}
+
           <View style={styles.list}>
             {selectedHolidays.length ? (
               selectedHolidays.map((holiday) => (
@@ -186,6 +189,7 @@ export default function CalendarScreen({ navigation }) {
               <EmptyState title="لا توجد عطلة رسمية في هذا اليوم" description="ستظهر العطل الرسمية السعودية هنا عند توافق التاريخ." />
             ) : null}
           </View>
+
           {fallbackUsed ? <Text style={styles.noteText}>يتم الآن عرض نسخة محلية احتياطية من العطل الرسمية.</Text> : null}
         </View>
       </ScrollView>
