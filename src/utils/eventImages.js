@@ -21,6 +21,10 @@ export function getImageKeyForCategory(category) {
 }
 
 export function getEventImageSource(event) {
+  if (event?.imageUri) {
+    return { uri: event.imageUri };
+  }
+
   const key = event?.imageKey || getImageKeyForCategory(event?.category);
   return eventImageSources[key] || eventImageSources.general;
 }

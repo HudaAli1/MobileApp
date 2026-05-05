@@ -6,7 +6,7 @@ import FormField from '../../components/FormField';
 import PrimaryButton from '../../components/PrimaryButton';
 import SecondaryButton from '../../components/SecondaryButton';
 import { useAppContext } from '../../context/AppContext';
-import { isValidEmail, isUniversityEmail, validateLoginForm, validatePasswordChange } from '../../utils/authValidation';
+import { isUniversityEmail, isValidEmail, validateLoginForm, validatePasswordChange } from '../../utils/authValidation';
 import { colors } from '../../constants/colors';
 import { spacing } from '../../constants/spacing';
 import { typography } from '../../constants/typography';
@@ -22,11 +22,13 @@ export default function ForgotPasswordScreen({ navigation }) {
   const handleSendCode = async () => {
     const nextErrors = validateLoginForm({ email, password: 'placeholder' });
     delete nextErrors.password;
+
     if (!nextErrors.email && !isValidEmail(email)) {
       nextErrors.email = 'يرجى إدخال بريد إلكتروني صحيح.';
     } else if (!nextErrors.email && !isUniversityEmail(email)) {
       nextErrors.email = 'يرجى استخدام البريد الجامعي المنتهي بـ @iau.edu.sa.';
     }
+
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length) {
@@ -39,7 +41,7 @@ export default function ForgotPasswordScreen({ navigation }) {
       return;
     }
 
-    Alert.alert('رمز التحقق', `رمز إعادة التعيين: ${result.payload.code}`);
+    Alert.alert('رمز التحقق', `تم إرسال رمز إعادة التعيين: ${result.payload.code}`);
   };
 
   const handleResetPassword = async () => {
@@ -49,9 +51,11 @@ export default function ForgotPasswordScreen({ navigation }) {
       confirmNewPassword: confirmPassword,
     });
     delete validation.currentPassword;
+
     if (!code.trim()) {
       validation.code = 'رمز التحقق مطلوب.';
     }
+
     setErrors(validation);
 
     if (Object.keys(validation).length) {
@@ -74,7 +78,8 @@ export default function ForgotPasswordScreen({ navigation }) {
       Alert.alert('نسيت كلمة المرور', 'لا يوجد طلب إعادة تعيين نشط.');
       return;
     }
-    Alert.alert('رمز التحقق', `رمز إعادة التعيين الجديد: ${payload.code}`);
+
+    Alert.alert('رمز التحقق', `تم إرسال رمز جديد: ${payload.code}`);
   };
 
   return (
@@ -83,6 +88,7 @@ export default function ForgotPasswordScreen({ navigation }) {
         <AppHeader title="Forgot Password" onBack={() => navigation.goBack()} />
         <View style={styles.form}>
           <Text style={styles.info}>أدخلي بريدك الجامعي ثم استخدمي رمز التحقق لإعادة تعيين كلمة المرور.</Text>
+
           <FormField
             label="University Email *"
             value={email}
@@ -92,10 +98,11 @@ export default function ForgotPasswordScreen({ navigation }) {
             autoCapitalize="none"
             error={errors.email}
           />
+
           <PrimaryButton label="Send Code" onPress={handleSendCode} />
+
           {passwordReset ? (
             <>
-              <Text style={styles.demoCode}>رمز العرض التجريبي: {passwordReset.code}</Text>
               <FormField
                 label="Verification Code *"
                 value={code}
@@ -105,6 +112,7 @@ export default function ForgotPasswordScreen({ navigation }) {
                 autoCapitalize="none"
                 error={errors.code}
               />
+
               <FormField
                 label="New Password *"
                 value={newPassword}
@@ -114,6 +122,7 @@ export default function ForgotPasswordScreen({ navigation }) {
                 autoCapitalize="none"
                 error={errors.newPassword}
               />
+
               <FormField
                 label="Confirm Password *"
                 value={confirmPassword}
@@ -123,6 +132,7 @@ export default function ForgotPasswordScreen({ navigation }) {
                 autoCapitalize="none"
                 error={errors.confirmNewPassword}
               />
+
               <PrimaryButton label="Reset Password" onPress={handleResetPassword} />
               <SecondaryButton label="Resend Code" onPress={handleResend} />
             </>
@@ -147,10 +157,5 @@ const styles = StyleSheet.create({
   },
   info: {
     ...typography.body,
-  },
-  demoCode: {
-    ...typography.sectionTitle,
-    color: colors.primary,
-    textAlign: 'center',
   },
 });

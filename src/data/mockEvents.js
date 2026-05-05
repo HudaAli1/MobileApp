@@ -2,8 +2,8 @@ export const mockEvents = [
   {
     id: '1',
     title: 'ورشة أساسيات الذكاء الاصطناعي',
-    date: '21 أبريل 2026',
-    time: '10:00 ص',
+    date: 'April 21, 2026',
+    time: '10:00 AM',
     location: 'قاعة الابتكار - كلية علوم الحاسب',
     category: 'علوم الحاسب',
     description:
@@ -17,8 +17,8 @@ export const mockEvents = [
   {
     id: '2',
     title: 'لقاء التهيئة المهنية',
-    date: '22 أبريل 2026',
-    time: '1:30 م',
+    date: 'April 22, 2026',
+    time: '1:30 PM',
     location: 'مركز الإرشاد المهني - مبنى الطالبات',
     category: 'عام',
     description:
@@ -32,8 +32,8 @@ export const mockEvents = [
   {
     id: '3',
     title: 'نادي القراءة باللغة الإنجليزية',
-    date: '24 أبريل 2026',
-    time: '12:00 م',
+    date: 'April 24, 2026',
+    time: '12:00 PM',
     location: 'مركز اللغة الإنجليزية - المبنى الأكاديمي',
     category: 'اللغة الإنجليزية',
     description:
@@ -47,8 +47,8 @@ export const mockEvents = [
   {
     id: '4',
     title: 'فعالية يوم الطاقة',
-    date: '24 أبريل 2026',
-    time: '3:00 م',
+    date: 'April 24, 2026',
+    time: '3:00 PM',
     location: 'بهو الكلية - جناح الطاقة والاستدامة',
     category: 'الطاقة',
     description:
@@ -62,8 +62,8 @@ export const mockEvents = [
   {
     id: '5',
     title: 'ورشة الأمن السيبراني',
-    date: '27 أبريل 2026',
-    time: '11:00 ص',
+    date: 'April 27, 2026',
+    time: '11:00 AM',
     location: 'معمل الشبكات - كلية علوم الحاسب',
     category: 'علوم الحاسب',
     description:
@@ -77,8 +77,8 @@ export const mockEvents = [
   {
     id: '6',
     title: 'معرض مشاريع الطالبات',
-    date: '10 أبريل 2026',
-    time: '9:00 ص',
+    date: 'April 10, 2026',
+    time: '9:00 AM',
     location: 'الردهة الرئيسية - مبنى الكلية',
     category: 'عام',
     description:
@@ -92,8 +92,8 @@ export const mockEvents = [
   {
     id: '7',
     title: 'ملتقى البحث العلمي',
-    date: '03 أبريل 2026',
-    time: '5:00 م',
+    date: 'April 3, 2026',
+    time: '5:00 PM',
     location: 'قاعة 204 - مبنى العلوم',
     category: 'الرياضيات',
     description:
@@ -107,8 +107,8 @@ export const mockEvents = [
   {
     id: '8',
     title: 'ورشة تحليل البيانات',
-    date: '29 أبريل 2026',
-    time: '1:00 م',
+    date: 'April 29, 2026',
+    time: '1:00 PM',
     location: 'معمل التطبيقات - كلية علوم الحاسب',
     category: 'علوم الحاسب',
     description:

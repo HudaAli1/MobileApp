@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+export const HOLIDAY_API_ENDPOINT = 'https://date.nager.at/api/v3/publicholidays/2026/SA';
+
 const fallbackSaudiHolidays2026 = [
   {
     id: 'holiday-2026-1',
@@ -76,10 +78,25 @@ const fallbackSaudiHolidays2026 = [
 ];
 
 export async function fetchSaudiPublicHolidays(year = 2026) {
+  const endpoint = `https://date.nager.at/api/v3/publicholidays/${year}/SA`;
+
   try {
-    const response = await axios.get(`https://date.nager.at/api/v3/PublicHolidays/${year}/SA`, {
-      timeout: 8000,
+    const response = await axios.get(endpoint, {
+      timeout: 10000,
+      headers: {
+        Accept: 'application/json',
+      },
     });
+
+    if (!Array.isArray(response.data)) {
+      console.warn('Holiday API returned unexpected response shape.');
+      return {
+        holidays: fallbackSaudiHolidays2026,
+        fallbackUsed: true,
+        error: 'Unexpected holiday API response shape',
+        endpoint,
+      };
+    }
 
     return {
       holidays: response.data.map((holiday, index) => ({
@@ -92,11 +109,16 @@ export async function fetchSaudiPublicHolidays(year = 2026) {
         fallback: false,
       })),
       fallbackUsed: false,
+      error: '',
+      endpoint,
     };
-  } catch {
+  } catch (error) {
+    console.warn('Holiday API fallback used.');
     return {
       holidays: fallbackSaudiHolidays2026,
       fallbackUsed: true,
+      error: error?.message || 'Unknown holiday API error',
+      endpoint,
     };
   }
 }

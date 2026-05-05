@@ -5,44 +5,99 @@ import AppHeader from '../../components/AppHeader';
 import EventCard from '../../components/EventCard';
 import EmptyState from '../../components/EmptyState';
 import SectionTitle from '../../components/SectionTitle';
-import { useAppContext } from '../../context/AppContext';
-import { fetchSaudiPublicHolidays } from '../../services/api/holidayApi';
-import { getEventsForDate } from '../../utils/eventHelpers';
 import { colors } from '../../constants/colors';
 import { radii, spacing } from '../../constants/spacing';
 import { typography } from '../../constants/typography';
+import { useAppContext } from '../../context/AppContext';
+import { fetchSaudiPublicHolidays } from '../../services/api/holidayApi';
+import { getEventsForDate } from '../../utils/eventHelpers';
 
-const calendarDays = [
-  '2026-04-01', '2026-04-02', '2026-04-03', '2026-04-04', '2026-04-05', '2026-04-06', '2026-04-07',
-  '2026-04-08', '2026-04-09', '2026-04-10', '2026-04-11', '2026-04-12', '2026-04-13', '2026-04-14',
-  '2026-04-15', '2026-04-16', '2026-04-17', '2026-04-18', '2026-04-19', '2026-04-20', '2026-04-21',
-  '2026-04-22', '2026-04-23', '2026-04-24', '2026-04-25', '2026-04-26', '2026-04-27', '2026-04-28',
-  '2026-04-29', '2026-04-30',
-];
+function formatMonthTitle(date) {
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+}
+
+function formatIsoDate(isoDate) {
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(new Date(`${isoDate}T12:00:00`));
+}
+
+function toIsoDate(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function buildCalendarDays(displayedMonth) {
+  const year = displayedMonth.getFullYear();
+  const month = displayedMonth.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const totalDays = new Date(year, month + 1, 0).getDate();
+  const leadingBlankCount = firstDay.getDay();
+
+  const blanks = Array.from({ length: leadingBlankCount }, (_, index) => ({
+    key: `blank-${index}`,
+    type: 'blank',
+  }));
+
+  const days = Array.from({ length: totalDays }, (_, index) => {
+    const date = new Date(year, month, index + 1);
+    return {
+      key: toIsoDate(date),
+      type: 'day',
+      isoDate: toIsoDate(date),
+      dayNumber: index + 1,
+    };
+  });
+
+  return [...blanks, ...days];
+}
 
 export default function CalendarScreen({ navigation }) {
   const { events } = useAppContext();
-  const [selectedDate, setSelectedDate] = useState('2026-04-24');
+  const today = useMemo(() => new Date(), []);
+  const [displayedMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [selectedDate, setSelectedDate] = useState(toIsoDate(today));
   const [holidays, setHolidays] = useState([]);
   const [loadingHolidays, setLoadingHolidays] = useState(true);
   const [holidayError, setHolidayError] = useState('');
   const [fallbackUsed, setFallbackUsed] = useState(false);
 
+  const monthTitle = useMemo(() => formatMonthTitle(displayedMonth), [displayedMonth]);
+  const calendarDays = useMemo(() => buildCalendarDays(displayedMonth), [displayedMonth]);
+
   const loadHolidays = async () => {
     setLoadingHolidays(true);
     setHolidayError('');
-    const result = await fetchSaudiPublicHolidays(2026);
+
+    const result = await fetchSaudiPublicHolidays(displayedMonth.getFullYear());
     setHolidays(result.holidays);
     setFallbackUsed(result.fallbackUsed);
+
     if (result.fallbackUsed) {
-      setHolidayError('تم عرض العطل الرسمية المحفوظة محليًا بسبب تعذر الاتصال بالخدمة.');
+      console.warn('Holiday API fallback used:', result.error);
+      setHolidayError('تعذر الاتصال بخدمة العطل الرسمية، يتم عرض نسخة محلية احتياطية.');
     }
+
     setLoadingHolidays(false);
   };
 
   useEffect(() => {
     void loadHolidays();
-  }, []);
+  }, [displayedMonth]);
+
+  useEffect(() => {
+    const selected = new Date(`${selectedDate}T12:00:00`);
+    const sameMonth = selected.getFullYear() === displayedMonth.getFullYear()
+      && selected.getMonth() === displayedMonth.getMonth();
+
+    if (!sameMonth) {
+      setSelectedDate(toIsoDate(displayedMonth));
+    }
+  }, [displayedMonth, selectedDate]);
 
   const selectedEvents = useMemo(() => getEventsForDate(events, selectedDate), [events, selectedDate]);
   const selectedHolidays = useMemo(
@@ -53,7 +108,7 @@ export default function CalendarScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-        <AppHeader title="Calendar" subtitle="April 2026" />
+        <AppHeader title="Calendar" subtitle={monthTitle} />
 
         <View style={styles.calendarCard}>
           <View style={styles.weekRow}>
@@ -62,18 +117,24 @@ export default function CalendarScreen({ navigation }) {
             ))}
           </View>
           <View style={styles.grid}>
-            {calendarDays.map((date) => {
-              const number = date.split('-')[2];
-              const hasEvent = events.some((event) => event.fullDate === date);
-              const hasHoliday = holidays.some((holiday) => holiday.date === date);
-              const selected = selectedDate === date;
+            {calendarDays.map((item) => {
+              if (item.type === 'blank') {
+                return <View key={item.key} style={styles.dayCell} />;
+              }
+
+              const hasEvent = events.some((event) => event.fullDate === item.isoDate);
+              const hasHoliday = holidays.some((holiday) => holiday.date === item.isoDate);
+              const selected = selectedDate === item.isoDate;
+
               return (
                 <TouchableOpacity
-                  key={date}
-                  onPress={() => setSelectedDate(date)}
+                  key={item.key}
+                  onPress={() => setSelectedDate(item.isoDate)}
                   style={[styles.dayCell, selected && styles.selectedDay]}
                 >
-                  <Text style={[styles.dayText, selected && styles.selectedDayText]}>{String(Number(number))}</Text>
+                  <Text style={[styles.dayText, selected && styles.selectedDayText]}>
+                    {String(item.dayNumber)}
+                  </Text>
                   {hasEvent ? <View style={[styles.dot, selected && styles.selectedDot]} /> : null}
                   {hasHoliday ? <View style={[styles.holidayDot, selected && styles.selectedHolidayDot]} /> : null}
                 </TouchableOpacity>
@@ -103,21 +164,25 @@ export default function CalendarScreen({ navigation }) {
           <SectionTitle title="العطل الرسمية" />
           {loadingHolidays ? <Text style={styles.statusText}>جاري تحميل العطل الرسمية...</Text> : null}
           {holidayError ? (
-            <TouchableOpacity onPress={() => void loadHolidays()}>
+            <View style={styles.feedbackBlock}>
               <Text style={styles.errorText}>{holidayError}</Text>
-              <Text style={styles.retryText}>إعادة المحاولة</Text>
-            </TouchableOpacity>
+              <TouchableOpacity onPress={() => void loadHolidays()}>
+                <Text style={styles.retryText}>إعادة المحاولة</Text>
+              </TouchableOpacity>
+            </View>
           ) : null}
           <View style={styles.list}>
             {selectedHolidays.length ? (
               selectedHolidays.map((holiday) => (
                 <View key={holiday.id} style={styles.holidayCard}>
-                  <Text style={styles.holidayLabel}>إجازة رسمية</Text>
+                  <Text style={styles.holidayLabel}>
+                    {holiday.fallback ? 'إجازة رسمية (نسخة احتياطية)' : 'إجازة رسمية'}
+                  </Text>
                   <Text style={styles.holidayTitle}>{holiday.localName || holiday.name}</Text>
-                  <Text style={styles.holidayDate}>{holiday.date}</Text>
+                  <Text style={styles.holidayDate}>{formatIsoDate(holiday.date)}</Text>
                 </View>
               ))
-            ) : !loadingHolidays && !selectedHolidays.length ? (
+            ) : !loadingHolidays ? (
               <EmptyState title="لا توجد عطلة رسمية في هذا اليوم" description="ستظهر العطل الرسمية السعودية هنا عند توافق التاريخ." />
             ) : null}
           </View>
@@ -200,6 +265,9 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: spacing.md,
+  },
+  feedbackBlock: {
+    gap: spacing.xs,
   },
   statusText: {
     ...typography.body,
