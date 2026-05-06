@@ -9,16 +9,33 @@ import { colors } from '../../constants/colors';
 import { spacing } from '../../constants/spacing';
 
 export default function EditProfileScreen({ navigation }) {
+  // Get user data and function to update profile from global context
   const { user, updateProfile } = useAppContext();
+
+  // Local state for editable name field (initially from user data)
   const [name, setName] = useState(user?.name || '');
+
+  // Local state for editable email field (initially from user data)
   const [email, setEmail] = useState(user?.email || '');
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
+        
+        {/* Top header with back navigation */}
         <AppHeader title="Edit Profile" onBack={() => navigation.goBack()} />
+
         <View style={styles.form}>
-          <FormField label="Name" value={name} onChangeText={setName} placeholder="Your name" />
+          
+          {/* Name input field */}
+          <FormField 
+            label="Name" 
+            value={name} 
+            onChangeText={setName} 
+            placeholder="Your name" 
+          />
+
+          {/* Email input field */}
           <FormField
             label="Email"
             value={email}
@@ -27,19 +44,23 @@ export default function EditProfileScreen({ navigation }) {
             keyboardType="email-address"
           />
         </View>
+
+        {/* Save button updates profile and goes back */}
         <PrimaryButton
           label="Save"
           onPress={async () => {
-            await updateProfile({ name, email });
-            Alert.alert('الحساب', 'تم حفظ معلومات الحساب بنجاح');
-            navigation.goBack();
+            await updateProfile({ name, email }); // update user data
+            Alert.alert('الحساب', 'تم حفظ معلومات الحساب بنجاح'); // success message
+            navigation.goBack(); // return to previous screen
           }}
         />
+
       </ScrollView>
     </SafeAreaView>
   );
 }
 
+// Styles for layout and spacing
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
