@@ -11,7 +11,8 @@ import { useAppContext } from '../../context/AppContext';
 import { colors } from '../../constants/colors';
 import { radii, spacing } from '../../constants/spacing';
 import { typography } from '../../constants/typography';
-import { categories } from '../../utils/eventHelpers';
+// استيراد الدالة الجديدة والـ categories من ملف الـ utils
+import { categories, isDateInPast } from '../../utils/eventHelpers'; 
 import { getImageKeyForCategory } from '../../utils/eventImages';
 
 function formatDisplayDate(date) {
@@ -91,6 +92,7 @@ export default function AddEditEventScreen({ navigation, route }) {
   };
 
   const saveEvent = async () => {
+    // التحققات الأساسية من الحقول الفارغة
     if (!form.title.trim()) {
       Alert.alert('الفعالية', 'يرجى إدخال عنوان الفعالية.');
       return;
@@ -111,8 +113,15 @@ export default function AddEditEventScreen({ navigation, route }) {
       return;
     }
 
+    // التحقق من التاريخ المختار
     if (!form.fullDate || !eventDate) {
       Alert.alert('الفعالية', 'يرجى اختيار التاريخ.');
+      return;
+    }
+
+    // --- التعديل الجديد: التحقق من التاريخ القديم ---
+    if (isDateInPast(form.fullDate)) {
+      Alert.alert('تنبيه', 'لا يمكن إضافة مناسبة في تاريخ قديم.');
       return;
     }
 
@@ -130,44 +139,51 @@ export default function AddEditEventScreen({ navigation, route }) {
       fullDate: form.fullDate,
     };
 
-    if (mode === 'edit' && eventId) {
-      await updateEvent(eventId, payload);
-      Alert.alert('الفعاليات', 'تم تعديل الفعالية بنجاح');
-    } else {
-      await addEvent(payload);
-      Alert.alert('الفعاليات', 'تمت إضافة الفعالية بنجاح');
+    try {
+      if (mode === 'edit' && eventId) {
+        // حالة التعديل
+        await updateEvent(eventId, payload);
+        Alert.alert('الفعاليات', 'تم تعديل الفعالية بنجاح');
+      } else {
+        // حالة الإضافة الجديدة
+        await addEvent(payload);
+        Alert.alert('الفعاليات', 'تمت إضافة الفعالية بنجاح');
+      }
+      navigation.goBack();
+    } catch (error) {
+      // التعامل مع الأخطاء غير المتوقعة
+      Alert.alert('خطأ', 'حدثت مشكلة أثناء الحفظ، يرجى المحاولة مرة أخرى.');
+      console.error(error);
     }
-
-    navigation.goBack();
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <AppHeader title={mode === 'edit' ? 'Edit Event' : 'Add New Event'} onBack={() => navigation.goBack()} />
+          <AppHeader title={mode === 'edit' ? 'تعديل الفعالية' : 'إضافة فعالية جديدة'} onBack={() => navigation.goBack()} />
           <View style={styles.topSection}>
             <BrandLogo width={300} height={220} style={styles.logoSpacing} />
           </View>
 
           <View style={styles.form}>
             <FormField
-              label="Event Title"
+              label="عنوان الفعالية"
               value={form.title}
               onChangeText={(title) => setForm((current) => ({ ...current, title }))}
-              placeholder="Enter event title"
+              placeholder="أدخل عنوان الفعالية"
             />
 
             <FormField
-              label="Description"
+              label="الوصف"
               value={form.description}
               onChangeText={(description) => setForm((current) => ({ ...current, description }))}
-              placeholder="Event description..."
+              placeholder="وصف الفعالية..."
               multiline
             />
 
             <Pressable style={styles.selector} onPress={() => setShowDatePicker(true)}>
-              <Text style={styles.selectorLabel}>Event Date</Text>
+              <Text style={styles.selectorLabel}>التاريخ</Text>
               <Text style={[styles.selectorValue, !form.date && styles.placeholderText]}>
                 {form.date || 'اختر التاريخ'}
               </Text>
@@ -183,7 +199,7 @@ export default function AddEditEventScreen({ navigation, route }) {
             ) : null}
 
             <Pressable style={styles.selector} onPress={() => setShowTimePicker(true)}>
-              <Text style={styles.selectorLabel}>Event Time</Text>
+              <Text style={styles.selectorLabel}>الوقت</Text>
               <Text style={[styles.selectorValue, !form.time && styles.placeholderText]}>
                 {form.time || 'اختر الوقت'}
               </Text>
@@ -199,10 +215,10 @@ export default function AddEditEventScreen({ navigation, route }) {
             ) : null}
 
             <FormField
-              label="Location"
+              label="الموقع"
               value={form.location}
               onChangeText={(location) => setForm((current) => ({ ...current, location }))}
-              placeholder="Enter location"
+              placeholder="أدخل الموقع"
             />
 
             <View style={styles.categoryWrap}>
@@ -223,7 +239,7 @@ export default function AddEditEventScreen({ navigation, route }) {
             </View>
           </View>
 
-          <PrimaryButton label="Save" onPress={saveEvent} />
+          <PrimaryButton label="حفظ" onPress={saveEvent} />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
