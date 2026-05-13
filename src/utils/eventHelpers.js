@@ -18,3 +18,14 @@ export function getEventsForDate(events, date) {
 export function getInterestEvents(events, interests) {
   return events.filter((event) => interests.includes(event.category) && !event.isPast);
 }
+
+export function isDateInPast(dateString) {
+  const selectedDate = new Date(dateString);
+  const today = new Date();
+  
+  // تصفير الوقت لمقارنة الأيام فقط
+  today.setHours(0, 0, 0, 0);
+  selectedDate.setHours(0, 0, 0, 0);
+
+  return selectedDate < today;
+}
