@@ -11,7 +11,8 @@ import { useAppContext } from '../../context/AppContext';
 import { colors } from '../../constants/colors';
 import { radii, spacing } from '../../constants/spacing';
 import { typography } from '../../constants/typography';
-import { categories } from '../../utils/eventHelpers';
+// تأكدي من وجود isDateInPast هنا
+import { categories, isDateInPast } from '../../utils/eventHelpers'; 
 import { getImageKeyForCategory } from '../../utils/eventImages';
 
 function formatDisplayDate(date) {
@@ -65,7 +66,6 @@ export default function AddEditEventScreen({ navigation, route }) {
     if (Platform.OS !== 'ios') {
       setShowDatePicker(false);
     }
-
     if (pickerEvent.type === 'dismissed' || !selectedDate) return;
 
     setEventDate(selectedDate);
@@ -80,7 +80,6 @@ export default function AddEditEventScreen({ navigation, route }) {
     if (Platform.OS !== 'ios') {
       setShowTimePicker(false);
     }
-
     if (pickerEvent.type === 'dismissed' || !selectedTime) return;
 
     setEventTime(selectedTime);
@@ -91,6 +90,7 @@ export default function AddEditEventScreen({ navigation, route }) {
   };
 
   const saveEvent = async () => {
+    // 1. التحقق من الحقول الأساسية
     if (!form.title.trim()) {
       Alert.alert('الفعالية', 'يرجى إدخال عنوان الفعالية.');
       return;
@@ -101,23 +101,25 @@ export default function AddEditEventScreen({ navigation, route }) {
       return;
     }
 
-    if (!form.location.trim()) {
-      Alert.alert('الفعالية', 'يرجى إدخال موقع الفعالية.');
-      return;
-    }
-
-    if (!form.category) {
-      Alert.alert('الفعالية', 'يرجى اختيار تصنيف الفعالية.');
-      return;
-    }
-
+    // 2. التحقق من التاريخ (المنع هنا)
     if (!form.fullDate || !eventDate) {
       Alert.alert('الفعالية', 'يرجى اختيار التاريخ.');
       return;
     }
 
+    // سطر المنع الحاسم:
+    if (isDateInPast(form.fullDate)) {
+      Alert.alert('تنبيه', 'لا يمكن إضافة مناسبة في تاريخ قديم');
+      return; // هذا السطر يمنع الانتقال لعملية الإضافة
+    }
+
     if (!form.time || !eventTime) {
       Alert.alert('الفعالية', 'يرجى اختيار الوقت.');
+      return;
+    }
+
+    if (!form.category) {
+      Alert.alert('الفعالية', 'يرجى اختيار تصنيف الفعالية.');
       return;
     }
 
@@ -130,6 +132,7 @@ export default function AddEditEventScreen({ navigation, route }) {
       fullDate: form.fullDate,
     };
 
+    // 3. تنفيذ الإضافة أو التعديل
     if (mode === 'edit' && eventId) {
       await updateEvent(eventId, payload);
       Alert.alert('الفعاليات', 'تم تعديل الفعالية بنجاح');
@@ -231,49 +234,15 @@ export default function AddEditEventScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  root: {
-    flex: 1,
-  },
-  topSection: {
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  container: {
-    padding: spacing.lg,
-    paddingTop: spacing.sm,
-    gap: spacing.md,
-    paddingBottom: spacing.xxl,
-  },
-  form: {
-    gap: spacing.md,
-  },
-  logoSpacing: {
-    marginBottom: 10,
-  },
-  categoryWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  selector: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.lg,
-    padding: spacing.md,
-    gap: spacing.xs,
-  },
-  selectorLabel: {
-    ...typography.label,
-  },
-  selectorValue: {
-    ...typography.body,
-    color: colors.text,
-  },
-  placeholderText: {
-    color: colors.muted,
-  },
+  safeArea: { flex: 1, backgroundColor: colors.background },
+  root: { flex: 1 },
+  topSection: { alignItems: 'center', marginBottom: 10 },
+  container: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xxl },
+  form: { gap: spacing.md },
+  logoSpacing: { marginBottom: 10 },
+  categoryWrap: { flexDirection: 'row', flexWrap: 'wrap' },
+  selector: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: radii.lg, padding: spacing.md, gap: spacing.xs },
+  selectorLabel: { ...typography.label },
+  selectorValue: { ...typography.body, color: colors.text },
+  placeholderText: { color: colors.muted },
 });
