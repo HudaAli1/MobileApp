@@ -11,7 +11,8 @@ import { useAppContext } from '../../context/AppContext';
 import { colors } from '../../constants/colors';
 import { radii, spacing } from '../../constants/spacing';
 import { typography } from '../../constants/typography';
-import { categories } from '../../utils/eventHelpers';
+// استدعاء الدوال المساعدة مع التأكد من وجود isDateInPast
+import { categories, isDateInPast } from '../../utils/eventHelpers'; 
 import { getImageKeyForCategory } from '../../utils/eventImages';
 
 function formatDisplayDate(date) {
@@ -56,6 +57,7 @@ export default function AddEditEventScreen({ navigation, route }) {
       fullDate: '',
     },
   );
+  
   const [eventDate, setEventDate] = useState(initialDate);
   const [eventTime, setEventTime] = useState(initialTime);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -65,7 +67,6 @@ export default function AddEditEventScreen({ navigation, route }) {
     if (Platform.OS !== 'ios') {
       setShowDatePicker(false);
     }
-
     if (pickerEvent.type === 'dismissed' || !selectedDate) return;
 
     setEventDate(selectedDate);
@@ -80,7 +81,6 @@ export default function AddEditEventScreen({ navigation, route }) {
     if (Platform.OS !== 'ios') {
       setShowTimePicker(false);
     }
-
     if (pickerEvent.type === 'dismissed' || !selectedTime) return;
 
     setEventTime(selectedTime);
@@ -91,19 +91,34 @@ export default function AddEditEventScreen({ navigation, route }) {
   };
 
   const saveEvent = async () => {
+    // 1. التحقق من الحقول النصية
     if (!form.title.trim()) {
       Alert.alert('الفعالية', 'يرجى إدخال عنوان الفعالية.');
       return;
     }
-
     if (!form.description.trim()) {
       Alert.alert('الفعالية', 'يرجى إدخال وصف الفعالية.');
       return;
     }
-
     if (!form.location.trim()) {
-      Alert.alert('الفعالية', 'يرجى إدخال موقع الفعالية.');
+      Alert.alert('الفعالية', 'يرجى إدخال الموقع.');
       return;
+    }
+
+    // 2. التحقق من اختيار التاريخ والوقت
+    if (!form.fullDate || !eventDate) {
+      Alert.alert('الفعالية', 'يرجى اختيار التاريخ أولاً.');
+      return;
+    }
+    if (!form.time || !eventTime) {
+      Alert.alert('الفعالية', 'يرجى اختيار الوقت.');
+      return;
+    }
+
+    // 3. التحقق الحاسم من التاريخ القديم (The Guard)
+    if (isDateInPast(form.fullDate)) {
+      Alert.alert('تنبيه', 'لا يمكن إضافة مناسبة في تاريخ قديم.');
+      return; // هذا السطر يمنع الكود من إكمال عملية الحفظ
     }
 
     if (!form.category) {
@@ -111,16 +126,7 @@ export default function AddEditEventScreen({ navigation, route }) {
       return;
     }
 
-    if (!form.fullDate || !eventDate) {
-      Alert.alert('الفعالية', 'يرجى اختيار التاريخ.');
-      return;
-    }
-
-    if (!form.time || !eventTime) {
-      Alert.alert('الفعالية', 'يرجى اختيار الوقت.');
-      return;
-    }
-
+    // 4. تجهيز البيانات للحفظ
     const payload = {
       ...form,
       imageKey: getImageKeyForCategory(form.category),
@@ -130,15 +136,18 @@ export default function AddEditEventScreen({ navigation, route }) {
       fullDate: form.fullDate,
     };
 
-    if (mode === 'edit' && eventId) {
-      await updateEvent(eventId, payload);
-      Alert.alert('الفعاليات', 'تم تعديل الفعالية بنجاح');
-    } else {
-      await addEvent(payload);
-      Alert.alert('الفعاليات', 'تمت إضافة الفعالية بنجاح');
+    try {
+      if (mode === 'edit' && eventId) {
+        await updateEvent(eventId, payload);
+        Alert.alert('الفعاليات', 'تم تعديل الفعالية بنجاح');
+      } else {
+        await addEvent(payload);
+        Alert.alert('الفعاليات', 'تمت إضافة الفعالية بنجاح');
+      }
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('خطأ', 'حدث خطأ أثناء حفظ البيانات.');
     }
-
-    navigation.goBack();
   };
 
   return (
@@ -175,7 +184,7 @@ export default function AddEditEventScreen({ navigation, route }) {
 
             {showDatePicker ? (
               <DateTimePicker
-                value={eventDate || new Date('2026-04-30T12:00:00')}
+                value={eventDate || new Date('2026-05-13T12:00:00')}
                 mode="date"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 onChange={handleDateChange}
@@ -191,7 +200,7 @@ export default function AddEditEventScreen({ navigation, route }) {
 
             {showTimePicker ? (
               <DateTimePicker
-                value={eventTime || new Date('2026-04-30T14:00:00')}
+                value={eventTime || new Date('2026-05-13T14:00:00')}
                 mode="time"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
                 onChange={handleTimeChange}
@@ -231,49 +240,22 @@ export default function AddEditEventScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
+  safeArea: { flex: 1, backgroundColor: colors.background },
+  root: { flex: 1 },
+  topSection: { alignItems: 'center', marginBottom: 10 },
+  container: { padding: spacing.lg, gap: spacing.md, paddingBottom: spacing.xxl },
+  form: { gap: spacing.md },
+  logoSpacing: { marginBottom: 10 },
+  categoryWrap: { flexDirection: 'row', flexWrap: 'wrap' },
+  selector: { 
+    backgroundColor: colors.surface, 
+    borderWidth: 1, 
+    borderColor: colors.border, 
+    borderRadius: radii.lg, 
+    padding: spacing.md, 
+    gap: spacing.xs 
   },
-  root: {
-    flex: 1,
-  },
-  topSection: {
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  container: {
-    padding: spacing.lg,
-    paddingTop: spacing.sm,
-    gap: spacing.md,
-    paddingBottom: spacing.xxl,
-  },
-  form: {
-    gap: spacing.md,
-  },
-  logoSpacing: {
-    marginBottom: 10,
-  },
-  categoryWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  selector: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radii.lg,
-    padding: spacing.md,
-    gap: spacing.xs,
-  },
-  selectorLabel: {
-    ...typography.label,
-  },
-  selectorValue: {
-    ...typography.body,
-    color: colors.text,
-  },
-  placeholderText: {
-    color: colors.muted,
-  },
+  selectorLabel: { ...typography.label },
+  selectorValue: { ...typography.body, color: colors.text },
+  placeholderText: { color: colors.muted },
 });
